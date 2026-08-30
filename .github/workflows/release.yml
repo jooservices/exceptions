@@ -1,0 +1,42 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*.*.*']
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  verify-and-release:
+    name: Verify and release
+    runs-on: [self-hosted, Linux, X64]
+    timeout-minutes: 45
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.0
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Verify tag is reachable from master
+        run: |
+          git fetch origin master
+          git merge-base --is-ancestor "${GITHUB_SHA}" origin/master
+      - name: Build tooling image
+        run: docker compose build php
+      - name: Install locked dependencies
+        run: docker compose run --rm php composer install --no-interaction --prefer-dist --no-progress
+      - name: Validate package metadata
+        run: docker compose run --rm php composer validate --strict
+      - name: Run complete quality gate
+        run: docker compose run --rm php composer ci
+      - name: Audit locked dependencies
+        run: docker compose run --rm php composer audit --locked
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "${GITHUB_REF_NAME}" --verify-tag --generate-notes

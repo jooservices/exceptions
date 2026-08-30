@@ -1,0 +1,60 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [master, develop]
+  push:
+    branches: [master, develop]
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    name: PHP 8.5 quality gate
+    runs-on: [self-hosted, Linux, X64]
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.0
+        with:
+          persist-credentials: false
+      - name: Build tooling image
+        run: docker compose build php
+      - name: Install locked dependencies
+        run: docker compose run --rm php composer install --no-interaction --prefer-dist --no-progress
+      - name: Validate package metadata
+        run: docker compose run --rm php composer validate --strict
+      - name: Run quality, documentation, tests, and coverage
+        run: docker compose run --rm php composer ci
+
+  security:
+    name: Security gate
+    runs-on: [self-hosted, Linux, X64]
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.0
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Build tooling image
+        run: docker compose build php
+      - name: Install locked dependencies
+        run: docker compose run --rm php composer install --no-interaction --prefer-dist --no-progress
+      - name: Audit locked dependencies
+        run: docker compose run --rm php composer audit --locked
+      - name: Scan for secrets
+        run: >-
+          docker run --rm --volume "${GITHUB_WORKSPACE}:/repo:ro" --workdir /repo
+          ghcr.io/gitleaks/gitleaks:v8.30.1@sha256:b109bc5f8f76a38196a3e413704fc5b9e3c32360bce4e4b603bd6f45b3721dbb
+          detect --source . --redact --exit-code 1
+      - name: Run PHP static application security testing
+        run: >-
+          docker run --rm --volume "${GITHUB_WORKSPACE}:/src:ro"
+          semgrep/semgrep@sha256:67319956da3dcb58baf5b322899c15458e3963e7018a86aeeb5cd224e69cb77a
+          semgrep scan --config p/php --error

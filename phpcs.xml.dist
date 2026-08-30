@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<ruleset name="JOOservices Exceptions">
+    <description>PSR-12 coding standard for jooservices/exceptions.</description>
+
+    <file>src</file>
+    <file>tests</file>
+
+    <arg name="colors"/>
+    <arg name="extensions" value="php"/>
+    <arg value="p"/>
+    <arg name="parallel" value="8"/>
+
+    <rule ref="PSR12">
+        <exclude name="PSR12.Files.FileHeader.SpacingAfterBlock"/>
+        <exclude name="PSR12.Classes.ClassInstantiation"/>
+        <exclude name="Generic.Files.LineLength"/>
+    </rule>
+
+    <rule ref="Generic.Arrays.ArrayIndent"/>
+    <rule ref="Generic.PHP.RequireStrictTypes"/>
+    <rule ref="Squiz.Arrays.ArrayBracketSpacing"/>
+    <rule ref="PSR1.Methods.CamelCapsMethodName"/>
+</ruleset>

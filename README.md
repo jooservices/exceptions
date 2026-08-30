@@ -1,0 +1,150 @@
+# JOOservices Exceptions Library
+
+[![CI](https://github.com/jooservices/exceptions/actions/workflows/ci.yml/badge.svg?branch=develop)](https://github.com/jooservices/exceptions/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/jooservices/exceptions/graph/badge.svg)](https://codecov.io/gh/jooservices/exceptions)
+[![Quality gate status](https://sonarcloud.io/api/project_badges/measure?project=jooservices_exceptions&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=jooservices_exceptions)
+[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/jooservices/exceptions/badge)](https://securityscorecards.dev/viewer/?uri=github.com/jooservices/exceptions)
+[![PHP Version](https://img.shields.io/badge/PHP-8.5%2B-blue.svg)](https://www.php.net/)
+[![Release](https://img.shields.io/badge/version-4.0.0-blue.svg)](CHANGELOG.md)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
+The **JOOservices Exceptions Library** is a PHP 8.5+ foundational library providing shared exception contracts, context-aware base classes, and secret redaction for the JOOservices package ecosystem.
+
+> [!WARNING]
+> **`v4.0.0` is a complete ground-up rebuild and is not backward compatible
+> with earlier package lines.** It starts a fresh Git history and has no
+> legacy shims or deprecation bridge.
+
+Package name: `jooservices/exceptions`
+
+## Install
+
+```bash
+composer require jooservices/exceptions
+```
+
+## Core Features
+
+- **Ecosystem-wide catching**: root marker `JOOExceptionInterface` for one catch clause across all packages.
+- **SPL semantics**: `AbstractJOORuntimeException` (operational) and `AbstractJOOLogicException` (programmer errors).
+- **Structured context**: immutable, redacted diagnostic context on `AbstractContextAwareException`, `AbstractContextAwareLogicException`, or via the `HasExceptionContext` trait.
+- **Stable error metadata**: `errorCode()` (`{package}.{domain}.{reason}`), `logLevel()` (PSR-3 vocabulary), `toLogArray()` (versioned `log_schema`).
+- **Sensitive data redaction**: `DefaultContextRedactor` + `CompositeContextRedactor::withExtraKeys()`.
+- **Framework decoupled**: zero runtime dependencies.
+
+## Basic Usage
+
+### Catching ecosystem exceptions
+
+```php
+// runnable
+use JOOservices\Exceptions\Contracts\JOOExceptionInterface;
+
+$caught = false;
+
+try {
+    throw new class('demo') extends \RuntimeException implements JOOExceptionInterface {};
+} catch (JOOExceptionInterface $exception) {
+    $caught = $exception instanceof \Throwable;
+}
+```
+
+### Declaring a package exception
+
+```php
+use JOOservices\Exceptions\Base\AbstractJOORuntimeException;
+
+abstract class ClientException extends AbstractJOORuntimeException {}
+```
+
+### Context-aware exceptions
+
+```php
+// runnable
+use JOOservices\Exceptions\Base\AbstractContextAwareException;
+use JOOservices\Exceptions\Support\ErrorCode;
+use JOOservices\Exceptions\Support\ExceptionContext;
+use JOOservices\Exceptions\Support\LogLevel;
+
+final class HydrationException extends AbstractContextAwareException
+{
+    public static function forField(string $path, string $expectedType): self
+    {
+        return (new self("Hydration failed for field '{$path}'"))
+            ->withContext(['path' => $path, 'expectedType' => $expectedType]);
+    }
+
+    public function errorCode(): string
+    {
+        return 'dto.hydration.failed';
+    }
+
+    public function logLevel(): string
+    {
+        return LogLevel::ERROR->value;
+    }
+
+    protected function copyWithContext(ExceptionContext $context): static
+    {
+        return new self($this->getMessage(), $this->getCode(), $this->getPrevious(), $context);
+    }
+}
+
+$exception = HydrationException::forField('user.email', 'string');
+
+// getContext() is always redacted before it reaches the logger
+$context = $exception->getContext();
+$logPayload = $exception->toLogArray();
+```
+
+### Redaction bootstrap
+
+```php
+// runnable
+use JOOservices\Exceptions\Base\AbstractContextAwareException;
+use JOOservices\Exceptions\Support\CompositeContextRedactor;
+
+AbstractContextAwareException::setRedactor(
+    CompositeContextRedactor::withExtraKeys(['national_id', 'ssn']),
+);
+
+AbstractContextAwareException::removeRedactor();
+```
+
+Never put secrets in exception **messages**. Put diagnostics in context and rely on redaction.
+
+## Documentation
+
+- [Documentation Hub](./docs/README.md)
+- [Architecture](./docs/00-architecture/01-project-overview.md)
+- [Quick Start](./docs/01-getting-started/02-quick-start.md)
+- [Laravel Integration](./docs/02-user-guide/09-laravel-integration.md)
+- [Risks and Gaps](./docs/05-maintenance/01-risks-and-gaps.md)
+- [Changelog](./CHANGELOG.md)
+- [Workflow guide](./WORKFLOWS.md)
+- [Contributing](./CONTRIBUTING.md)
+- [Security policy](./SECURITY.md)
+
+## Development
+
+Everything runs under Docker (workspace rule — no host-level runtimes):
+
+```bash
+make build            # builds jooservices/exceptions:php85 (php:8.5-cli-bookworm + pcov)
+make install          # composer install inside the container
+make lint             # Pint (per preset) + PHPCS + PHPStan (level max) + PHPMD
+make test             # PHPUnit, no coverage
+make test-coverage    # PHPUnit with 100% statement coverage gate
+make docs-verify      # README/docs code snippets must parse and run
+make check            # lint + docs + tests
+make ci               # the full CI gate, same as GitHub Actions
+```
+
+- [Setup](./docs/04-development/01-setup.md)
+- [Testing](./docs/04-development/02-testing.md)
+- [CI/CD](./docs/04-development/03-ci-cd.md)
+- [Release Process](./docs/04-development/04-release-process.md)
+
+## License
+
+MIT — see [LICENSE](./LICENSE).
