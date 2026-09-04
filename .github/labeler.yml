@@ -1,0 +1,37 @@
+'tests':
+  - changed-files:
+    - any-glob-to-any-file: 'tests/**/*'
+
+'documentation':
+  - changed-files:
+    - any-glob-to-any-file:
+      - '**.md'
+      - 'docs/**/*'
+
+'dependencies':
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'composer.json'
+      - 'composer.lock'
+
+'ci/cd':
+  - changed-files:
+    - any-glob-to-any-file:
+      - '.github/**/*'
+      - 'captainhook.json'
+      - 'Dockerfile'
+      - 'docker-compose.yml'
+
+'configuration':
+  - changed-files:
+    - any-glob-to-any-file:
+      - '**.xml'
+      - '**.neon'
+      - 'pint.json'
+      - 'phpstan.neon'
+      - 'phpmd.xml.dist'
+      - 'phpcs.xml.dist'
+
+'source':
+  - changed-files:
+    - any-glob-to-any-file: 'src/**/*'
