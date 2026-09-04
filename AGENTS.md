@@ -1,9 +1,5 @@
 # jooservices/exceptions
 
-Follow the JOOservices workspace `AGENTS.md` at `../../AGENTS.md`
-(identity, soulevilx, quality, runtime, coding practice). Do not weaken those
-rules.
-
 This file adds project-only rules.
 
 - PHP `^8.5`, **zero runtime dependencies**; framework-agnostic — no Illuminate/Symfony in `src/`
