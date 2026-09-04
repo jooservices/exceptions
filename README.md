@@ -124,10 +124,14 @@ Never put secrets in exception **messages**. Put diagnostics in context and rely
 - [Workflow guide](./WORKFLOWS.md)
 - [Contributing](./CONTRIBUTING.md)
 - [Security policy](./SECURITY.md)
+- [Support](./SUPPORT.md)
+- [Governance](./GOVERNANCE.md)
+- [Code of Conduct](./CODE_OF_CONDUCT.md)
 
 ## Development
 
-Everything runs under Docker (workspace rule — no host-level runtimes):
+Everything runs under Docker (`php:8.5-cli-bookworm`). GitHub Actions uses
+GitHub-hosted `ubuntu-latest` with the same Compose image via `tools/ci/docker-compose`:
 
 ```bash
 make build            # builds jooservices/exceptions:php85 (php:8.5-cli-bookworm + pcov)
@@ -137,7 +141,7 @@ make test             # PHPUnit, no coverage
 make test-coverage    # PHPUnit with 100% statement coverage gate
 make docs-verify      # README/docs code snippets must parse and run
 make check            # lint + docs + tests
-make ci               # the full CI gate, same as GitHub Actions
+make ci               # the full local CI gate (lint + docs + coverage)
 ```
 
 - [Setup](./docs/04-development/01-setup.md)

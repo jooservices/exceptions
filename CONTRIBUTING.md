@@ -17,3 +17,6 @@ coverage. Preserve immutable exception semantics: `copyWithContext()` must
 reconstruct the concrete type; `new static()` cloning is forbidden.
 
 Report security issues privately through [SECURITY.md](SECURITY.md).
+
+See also [SUPPORT.md](SUPPORT.md), [GOVERNANCE.md](GOVERNANCE.md), and
+[CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md).
