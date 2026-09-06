@@ -1,7 +1,7 @@
 # JOOservices Exceptions Library
 
 [![CI](https://github.com/jooservices/exceptions/actions/workflows/ci.yml/badge.svg?branch=develop)](https://github.com/jooservices/exceptions/actions/workflows/ci.yml)
-[![codecov](https://codecov.io/gh/jooservices/exceptions/graph/badge.svg)](https://codecov.io/gh/jooservices/exceptions)
+[![codecov](https://codecov.io/gh/jooservices/exceptions/graph/badge.svg?token=1YIRTZE5SH)](https://codecov.io/gh/jooservices/exceptions)
 [![Quality gate status](https://sonarcloud.io/api/project_badges/measure?project=jooservices_exceptions&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=jooservices_exceptions)
 [![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/jooservices/exceptions/badge)](https://securityscorecards.dev/viewer/?uri=github.com/jooservices/exceptions)
 [![PHP Version](https://img.shields.io/badge/PHP-8.5%2B-blue.svg)](https://www.php.net/)
