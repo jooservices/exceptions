@@ -25,7 +25,7 @@ flowchart TD
     push --> CodeQL
     push --> Audit
 
-    master[Push to master] --> Scorecard[OpenSSF Scorecard]
+    develop[Push to develop] --> Scorecard[OpenSSF Scorecard]
 
     tag[Push tag v*.*.*] --> Release[Release]
 
@@ -87,7 +87,7 @@ Fails if the tag is not reachable from `origin/master`.
 | `semantic-pr.yml` | PR opened, edited | PR title type + uppercase subject |
 | `pr-labeler.yml` | PR opened, synchronized, reopened | Path labels from `.github/labeler.yml` |
 | `link-check.yml` | Monday 04:00 UTC; manual | Lychee Markdown link check |
-| `scorecard.yml` | Push to `master`; Monday 00:00 UTC; manual | OpenSSF Scorecard (GitHub-hosted) |
+| `scorecard.yml` | Push to `develop`; Monday 00:00 UTC; manual | OpenSSF Scorecard (GitHub-hosted) |
 | `stale.yml` | Daily 01:00 UTC; manual | Stale issues/PRs |
 | `workflow-audit.yml` | `.github/**` changes; Monday 03:00 UTC; manual | Actionlint + Zizmor |
 
