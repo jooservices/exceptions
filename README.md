@@ -12,6 +12,8 @@
 
 The **JOOservices Exceptions Library** is a PHP 8.5+ foundational library providing shared exception contracts, context-aware base classes, and secret redaction for the JOOservices package ecosystem.
 
+Current release: **`v4.0.1`**.
+
 > [!WARNING]
 > **`v4.0.0` is a complete ground-up rebuild and is not backward compatible
 > with earlier package lines.** Rewrite integrations before upgrading; there are
@@ -133,6 +135,7 @@ Never put secrets in exception **messages**. Put diagnostics in context and rely
 ## Documentation
 
 - [Documentation Hub](./docs/README.md)
+- [API reference](./docs/02-user-guide/00-api-reference.md)
 - [Architecture](./docs/00-architecture/01-project-overview.md)
 - [Quick Start](./docs/01-getting-started/02-quick-start.md)
 - [Laravel Integration](./docs/02-user-guide/09-laravel-integration.md)
