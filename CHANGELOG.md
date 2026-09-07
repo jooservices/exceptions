@@ -10,6 +10,14 @@ follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [4.0.1] - 2026-09-07
+
+### Changed
+
+- Improved the consumer README with explicit release, coverage, Sonar, and package badges.
+- Added an API reference index linking the public exception contracts and user guides.
+- Updated the OpenSSF Scorecard workflow to analyze the `develop` integration branch.
+
 ## [4.0.0] - 2026-08-29
 
 ### Added
@@ -35,5 +43,6 @@ follows [Semantic Versioning](https://semver.org/).
 - Docker-first toolchain: `php:8.5-cli-bookworm` image, Makefile, CaptainHook git hooks.
 - GitHub Actions quality/security and tag-release workflows.
 
-[Unreleased]: https://github.com/jooservices/exceptions/compare/v4.0.0...HEAD
+[Unreleased]: https://github.com/jooservices/exceptions/compare/v4.0.1...HEAD
+[4.0.1]: https://github.com/jooservices/exceptions/releases/tag/v4.0.1
 [4.0.0]: https://github.com/jooservices/exceptions/releases/tag/v4.0.0

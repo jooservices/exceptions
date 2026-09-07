@@ -1,18 +1,17 @@
 # Dedicated CI for jooservices/exceptions — GitHub-hosted runners
-# Pull-request quality gate: full pipeline. Post-merge heads run ci-post-merge.yml.
-name: CI
+# Post-merge sanity run on master/develop heads. Full gate lives in ci.yml (pull requests).
+name: CI post-merge
 
 on:
-  pull_request:
+  push:
     branches: [master, develop]
 
 concurrency:
-  group: ci-${{ github.ref }}
+  group: ci-post-merge-${{ github.ref }}
   cancel-in-progress: true
 
 permissions:
   contents: read
-  pull-requests: read
   actions: read
 
 jobs:
@@ -45,124 +44,9 @@ jobs:
       - name: Composer validate
         run: tools/ci/docker-compose run --rm php composer validate --strict
 
-      - name: Verify documentation snippets
-        run: tools/ci/docker-compose run --rm php composer docs:verify
-
-  lint:
-    name: Lint (${{ matrix.name }})
-    needs: [validate]
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-    strategy:
-      fail-fast: true
-      matrix:
-        include:
-          - name: Pint
-            command: composer lint:pint
-          - name: PHPCS
-            command: composer lint:phpcs
-          - name: PHPStan
-            command: composer lint:phpstan
-          - name: PHPMD
-            command: composer lint:phpmd
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v7
-        with:
-          persist-credentials: false
-
-      - name: Build PHP image
-        run: tools/ci/docker-compose build php
-
-      - name: Cache Composer vendor
-        uses: actions/cache@v6
-        id: vendor-cache
-        with:
-          path: vendor
-          key: composer-vendor-${{ hashFiles('composer.lock') }}
-          restore-keys: |
-            composer-vendor-
-
-      - name: Install dependencies
-        if: steps.vendor-cache.outputs.cache-hit != 'true'
-        run: tools/ci/docker-compose run --rm php composer install --no-interaction --prefer-dist
-
-      - name: Run linter
-        run: tools/ci/docker-compose run --rm php ${{ matrix.command }}
-
-  security:
-    name: Security (${{ matrix.name }})
-    needs: [lint]
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-    strategy:
-      fail-fast: true
-      matrix:
-        include:
-          - name: Dependencies
-          - name: Secrets
-          - name: SAST
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v7
-        with:
-          fetch-depth: 0
-          persist-credentials: false
-
-      - name: Build PHP image
-        if: matrix.name == 'Dependencies'
-        run: tools/ci/docker-compose build php
-
-      - name: Cache Composer vendor
-        if: matrix.name == 'Dependencies'
-        uses: actions/cache@v6
-        id: vendor-cache
-        with:
-          path: vendor
-          key: composer-vendor-${{ hashFiles('composer.lock') }}
-          restore-keys: |
-            composer-vendor-
-
-      - name: Install dependencies
-        if: matrix.name == 'Dependencies' && steps.vendor-cache.outputs.cache-hit != 'true'
-        run: tools/ci/docker-compose run --rm php composer install --no-interaction --prefer-dist
-
-      - name: Composer audit
-        if: matrix.name == 'Dependencies'
-        run: tools/ci/docker-compose run --rm php composer audit --locked
-
-      - name: OSV Scanner
-        if: matrix.name == 'Dependencies'
-        uses: google/osv-scanner-action/osv-scanner-action@6e4298ebc4db23e847df9b2e2de2939d6f066c67 # v2.5.1
-        with:
-          scan-args: |-
-            --recursive
-            .
-
-      - name: Dependency Review
-        if: matrix.name == 'Dependencies'
-        uses: actions/dependency-review-action@v5
-
-      - name: Gitleaks OSS CLI
-        if: matrix.name == 'Secrets'
-        run: |
-          docker run --rm \
-            --volume "${GITHUB_WORKSPACE}:/repo:ro" \
-            --workdir /repo \
-            ghcr.io/gitleaks/gitleaks:v8.30.1@sha256:b109bc5f8f76a38196a3e413704fc5b9e3c32360bce4e4b603bd6f45b3721dbb \
-            detect --source . --redact --exit-code 1
-
-      - name: Semgrep (OSS)
-        if: matrix.name == 'SAST'
-        run: |
-          docker run --rm \
-            --volume "${GITHUB_WORKSPACE}:/src:ro" \
-            semgrep/semgrep@sha256:67319956da3dcb58baf5b322899c15458e3963e7018a86aeeb5cd224e69cb77a \
-            semgrep scan --config p/php --error
-
   test:
     name: Test (${{ matrix.name }})
-    needs: [lint]
+    needs: [validate]
     runs-on: ubuntu-latest
     timeout-minutes: 30
     strategy:
@@ -203,13 +87,13 @@ jobs:
       - name: Upload coverage artifact
         uses: actions/upload-artifact@v7
         with:
-          name: coverage-${{ matrix.suite }}
+          name: coverage-post-merge-${{ matrix.suite }}
           path: build/coverage/clover-${{ matrix.suite }}.xml
           if-no-files-found: error
 
   coverage:
     name: Coverage upload
-    needs: [test, security]
+    needs: [test]
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -225,7 +109,7 @@ jobs:
       - name: Download coverage artifacts
         uses: actions/download-artifact@v8
         with:
-          pattern: coverage-*
+          pattern: coverage-post-merge-*
           path: build/coverage/matrix
           merge-multiple: true
 
@@ -237,7 +121,6 @@ jobs:
           ls -la build/coverage
 
       - name: Upload to Codecov
-        if: github.event.pull_request.user.type != 'Bot'
         uses: codecov/codecov-action@v7
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
@@ -246,7 +129,6 @@ jobs:
           verbose: true
 
       - name: Resolve SonarQube host URL
-        if: github.event.pull_request.user.type != 'Bot'
         id: sonar-config
         env:
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
@@ -265,7 +147,6 @@ jobs:
           echo "host_url=${host_url}" >> "${GITHUB_OUTPUT}"
 
       - name: Upload SonarQube analysis
-        if: github.event.pull_request.user.type != 'Bot'
         uses: SonarSource/sonarqube-scan-action@v8
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
