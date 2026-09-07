@@ -1,6 +1,6 @@
 # GitHub Actions workflow guide
 
-All PHP jobs run in the repository Docker image on self-hosted Linux X64
+All PHP jobs run in the repository Docker image on GitHub-hosted Ubuntu
 runners.
 
 ```mermaid

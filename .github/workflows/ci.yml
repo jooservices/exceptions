@@ -16,7 +16,7 @@ permissions:
 jobs:
   quality:
     name: PHP 8.5 quality gate
-    runs-on: [self-hosted, Linux, X64]
+    runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
       - name: Checkout
@@ -34,7 +34,7 @@ jobs:
 
   security:
     name: Security gate
-    runs-on: [self-hosted, Linux, X64]
+    runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
       - name: Checkout

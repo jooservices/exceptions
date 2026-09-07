@@ -14,7 +14,7 @@ permissions:
 jobs:
   verify-and-release:
     name: Verify and release
-    runs-on: [self-hosted, Linux, X64]
+    runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
       - name: Checkout
