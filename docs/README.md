@@ -18,6 +18,7 @@ The JOOservices Exceptions Library documentation hub.
 
 ## User Guide
 
+- [API Reference](./02-user-guide/00-api-reference.md)
 - [Root Interface](./02-user-guide/01-root-interface.md)
 - [Context-Aware Exceptions](./02-user-guide/02-context-aware-exceptions.md)
 - [Context Redaction](./02-user-guide/03-context-redaction.md)
