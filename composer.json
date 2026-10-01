@@ -27,6 +27,7 @@
     "require-dev": {
         "captainhook/captainhook": "^5.24",
         "captainhook/plugin-composer": "^5.3",
+        "friendsofphp/php-cs-fixer": "^3.75",
         "laravel/pint": "^1.18",
         "phpmd/phpmd": "^2.15",
         "phpstan/phpstan": "^2.0",
@@ -51,32 +52,36 @@
         "lint:phpcs": "phpcs --standard=phpcs.xml.dist",
         "lint:phpstan": "XDEBUG_MODE=off phpstan analyse --configuration=phpstan.neon --memory-limit=512M",
         "lint:phpmd": "php -d error_reporting=6143 vendor/bin/phpmd src text phpmd.xml.dist",
+        "lint:cs": "php-cs-fixer fix --config=.php-cs-fixer.dist.php --dry-run --diff --sequential",
+        "lint:cs:fix": "php-cs-fixer fix --config=.php-cs-fixer.dist.php --sequential",
         "lint": [
             "@lint:pint",
             "@lint:phpcs",
-            "@lint:phpstan"
+            "@lint:phpstan",
+            "@lint:phpmd",
+            "@lint:cs"
         ],
         "lint:all": [
-            "@lint:pint",
-            "@lint:phpcs",
-            "@lint:phpstan",
-            "@lint:phpmd"
+            "@lint"
         ],
         "lint:fix": [
-            "@lint:pint:fix"
+            "@lint:pint:fix",
+            "@lint:cs:fix"
         ],
         "test": "phpunit --no-coverage",
-        "test:coverage": "phpunit --coverage-text --coverage-clover build/coverage.xml && php tools/ensure-coverage.php build/coverage.xml 100",
+        "test:coverage": "phpunit --coverage-text --coverage-clover build/coverage.xml",
+        "coverage:check": "php tools/ensure-coverage.php build/coverage.xml 100",
         "docs:verify": "php tools/ensure-docs-snippets.php",
         "check": [
-            "@lint:all",
+            "@lint",
             "@docs:verify",
             "@test"
         ],
         "ci": [
-            "@lint:all",
+            "@lint",
             "@docs:verify",
-            "@test:coverage"
+            "@test:coverage",
+            "@coverage:check"
         ],
         "post-install-cmd": "captainhook install --force --skip-existing",
         "post-update-cmd": "captainhook install --force --skip-existing"
