@@ -29,7 +29,7 @@
         "captainhook/plugin-composer": "^5.3",
         "friendsofphp/php-cs-fixer": "^3.75",
         "laravel/pint": "^1.18",
-        "phpmd/phpmd": "^2.15",
+        "phpmd/phpmd": "^2.15 || ^3.0",
         "phpstan/phpstan": "^2.0",
         "phpstan/phpstan-phpunit": "^2.0",
         "phpstan/phpstan-strict-rules": "^2.0",
